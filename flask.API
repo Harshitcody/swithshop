@@ -1,0 +1,42 @@
+from flask import Flask, jsonify, request
+from rec_engine import RecEngine
+import scraper
+
+app = Flask(__name__)
+engine = RecEngine()
+
+# scrape products
+raw = scraper.scrape_products()
+if not raw:
+    raw = [
+        {"title": "Wireless Headphones", "desc": "Bluetooth noise cancelling", "img": ""},
+        {"title": "Running Shoes", "desc": "Lightweight breathable mesh", "img": ""},
+        {"title": "Smart Watch", "desc": "Heart rate, fitness tracking", "img": ""},
+    ]
+
+for i, p in enumerate(raw):
+    engine.add_product(i+1, p["title"], p["desc"], p.get("img",""))
+engine.build()
+
+@app.route("/products")
+def list_products():
+    return jsonify(engine.products)
+
+@app.route("/like", methods=["POST"])
+def like():
+    data = request.json
+    pid = data.get("id")
+    try:
+        engine.like_product(int(pid))
+        return jsonify({"status": "liked", "id": pid})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route("/recommend")
+def recommend():
+    top = int(request.args.get("top", 5))
+    recs = engine.get_recommendations(top_n=top)
+    return jsonify(recs)
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
