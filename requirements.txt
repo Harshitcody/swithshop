@@ -1,0 +1,4 @@
+Flask
+Cython
+requests
+beautifulsoup4
