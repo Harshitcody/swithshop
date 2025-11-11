@@ -1,0 +1,8 @@
+# 1️⃣ Install dependencies
+pip install -r requirements.txt
+
+# 2️⃣ Build Cython module
+python setup.py build_ext --inplace
+
+# 3️⃣ Start API
+python app.py
